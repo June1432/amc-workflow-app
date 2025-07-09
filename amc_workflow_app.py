@@ -1,7 +1,8 @@
-# amc_workflow_app.py
+# amc_workflow_app.py – Final Integrated Version
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import random
 
 # --- App Setup ---
 st.set_page_config(
@@ -10,17 +11,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- Role Selection ---
-roles = [
-    "Investor", "Relationship Manager", "Fund Manager", "Operations",
-    "Compliance Officer", "Customer Support", "Fund Accounting",
-    "Admin", "Auditor"
-]
-
-st.sidebar.title("Login")
-role = st.sidebar.selectbox("Select Your Role", roles)
-
-# --- Common Light UI Theme ---
+# --- Light Theme Styling ---
 st.markdown("""
     <style>
         body {
@@ -33,102 +24,107 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- Mock Dashboards ---
-def investor_dashboard():
-    st.title("Investor Dashboard")
-    st.subheader("Your Portfolio")
-    portfolio_data = pd.DataFrame({
-        "Scheme": ["Equity Fund", "Debt Fund", "Hybrid Fund"],
-        "Current Value (₹ Lakhs)": [2.4, 1.5, 0.9],
-        "Returns (%)": [12.3, 5.2, 7.8]
-    })
-    st.dataframe(portfolio_data, use_container_width=True)
+# --- Sidebar Role Selector ---
+st.sidebar.title("Login")
+role = st.sidebar.selectbox("Select Your Role", [
+    "Investor", "Relationship Manager", "Fund Manager", "Operations",
+    "Compliance Officer", "Customer Support", "Fund Accounting",
+    "Admin", "Auditor"
+])
 
-    st.subheader("Goal Tracker")
-    fig = px.pie(portfolio_data, names="Scheme", values="Current Value (₹ Lakhs)", title="Asset Allocation")
-    st.plotly_chart(fig, use_container_width=True)
+# --- Loading Spinner ---
+with st.spinner("Loading dashboard..."):
 
+    if role == "Investor":
+        tab1, tab2, tab3 = st.tabs(["Portfolio", "Goal Tracker", "Insights"])
 
-def rm_dashboard():
-    st.title("Relationship Manager Dashboard")
-    st.subheader("Investor Pipeline")
-    st.metric("New Leads", 24)
-    st.metric("KYC Pending", 5)
-    st.metric("Active SIPs", 40)
+        with tab1:
+            st.subheader("Your Portfolio")
+            portfolio_data = pd.DataFrame({
+                "Scheme": ["Equity Fund", "Debt Fund", "Hybrid Fund"],
+                "Current Value (₹ Lakhs)": [2.4, 1.5, 0.9],
+                "Returns (%)": [12.3, 5.2, 7.8]
+            })
+            st.dataframe(portfolio_data, use_container_width=True)
 
+        with tab2:
+            st.subheader("Goal Tracker")
+            fig = px.pie(portfolio_data, names="Scheme", values="Current Value (₹ Lakhs)", title="Asset Allocation")
+            st.plotly_chart(fig, use_container_width=True)
 
-def fund_manager_dashboard():
-    st.title("Fund Manager Dashboard")
-    st.subheader("Scheme Performance Snapshot")
-    fund_data = pd.DataFrame({
-        "Scheme": ["Growth Fund", "Income Fund"],
-        "AUM (₹ Cr)": [520, 340],
-        "YTD Return (%)": [8.2, 6.5]
-    })
-    st.dataframe(fund_data, use_container_width=True)
+        with tab3:
+            st.subheader("AI Insights")
+            insights = [
+                "Consider increasing SIP in Equity Fund for long-term growth.",
+                "Your Hybrid Fund is underperforming; rebalancing recommended.",
+                "You are on track to meet your 5-year retirement goal."
+            ]
+            st.info(random.choice(insights))
 
+    elif role == "Relationship Manager":
+        st.title("Relationship Manager Dashboard")
+        st.metric("New Leads", 24)
+        st.metric("KYC Pending", 5)
+        st.metric("Active SIPs", 40)
+        with st.expander("KYC Status Tracker"):
+            st.write(pd.DataFrame({
+                "Investor": ["Raj", "Anita", "John"],
+                "Status": ["Pending", "Approved", "In Review"]
+            }))
 
-def operations_dashboard():
-    st.title("Operations Dashboard")
-    st.subheader("Transaction Monitoring")
-    st.write("Processed Transactions Today: 1,542")
-    st.write("Failed Transactions: 8")
+    elif role == "Fund Manager":
+        st.title("Fund Manager Dashboard")
+        tab1, tab2 = st.tabs(["Scheme Performance", "Benchmarking"])
 
+        with tab1:
+            fund_data = pd.DataFrame({
+                "Scheme": ["Growth Fund", "Income Fund"],
+                "AUM (₹ Cr)": [520, 340],
+                "YTD Return (%)": [8.2, 6.5]
+            })
+            st.dataframe(fund_data, use_container_width=True)
 
-def compliance_dashboard():
-    st.title("Compliance Dashboard")
-    st.subheader("Alerts")
-    st.warning("2 STR alerts flagged today")
-    st.info("All FATCA/CRS reports submitted")
+        with tab2:
+            st.info("Your Growth Fund outperformed Nifty50 by 1.3% this quarter.")
 
+    elif role == "Operations":
+        st.title("Operations Dashboard")
+        st.write("Processed Transactions Today: 1,542")
+        st.write("Failed Transactions: 8")
+        st.success("99.5% success rate")
 
-def support_dashboard():
-    st.title("Customer Support Dashboard")
-    st.subheader("Service Requests")
-    st.write("Open Tickets: 12")
-    st.write("Resolved Today: 18")
+    elif role == "Compliance Officer":
+        st.title("Compliance Dashboard")
+        st.warning("2 STR alerts flagged today")
+        st.info("All FATCA/CRS reports submitted")
+        st.metric("Last Audit Passed", "Yes")
 
+    elif role == "Customer Support":
+        st.title("Customer Support Dashboard")
+        st.write("Open Tickets: 12")
+        st.write("Resolved Today: 18")
+        with st.expander("Ticket Preview"):
+            st.write("#1003: SIP delay complaint - Resolved")
 
-def accounting_dashboard():
-    st.title("Fund Accounting Dashboard")
-    st.subheader("NAV & Distributions")
-    st.write("Today's NAVs published for 18 schemes")
-    st.write("Pending Dividend Payouts: 2")
+    elif role == "Fund Accounting":
+        st.title("Fund Accounting Dashboard")
+        st.write("Today's NAVs published for 18 schemes")
+        st.write("Pending Dividend Payouts: 2")
+        with st.expander("Download NAV Statements"):
+            st.download_button("Download (mock file)", "NAV123.csv")
 
+    elif role == "Admin":
+        st.title("Admin Panel")
+        st.write("Active Users: 84")
+        st.write("Recent Logins: 23 Today")
+        st.success("All access logs backed up")
 
-def admin_dashboard():
-    st.title("Admin Panel")
-    st.subheader("User Access Management")
-    st.write("Active Users: 84")
-    st.write("Recent Logins: 23 Today")
+    elif role == "Auditor":
+        st.title("Auditor Dashboard")
+        st.write("Downloadable logs for last 30 days")
+        st.button("Generate Audit Report")
+        st.info("Audit module access confirmed")
 
-
-def auditor_dashboard():
-    st.title("Auditor Dashboard")
-    st.subheader("Audit Trails")
-    st.write("Downloadable logs for last 30 days")
-    st.button("Generate Audit Report")
-
-# --- Role-Based Routing ---
-if role == "Investor":
-    investor_dashboard()
-elif role == "Relationship Manager":
-    rm_dashboard()
-elif role == "Fund Manager":
-    fund_manager_dashboard()
-elif role == "Operations":
-    operations_dashboard()
-elif role == "Compliance Officer":
-    compliance_dashboard()
-elif role == "Customer Support":
-    support_dashboard()
-elif role == "Fund Accounting":
-    accounting_dashboard()
-elif role == "Admin":
-    admin_dashboard()
-elif role == "Auditor":
-    auditor_dashboard()
-
-# Footer
+# --- Footer ---
 st.markdown("---")
 st.markdown("© 2025 NAVIS Mutual AMC | All rights reserved")
